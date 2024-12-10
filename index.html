@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Roboto+Serif:wght@300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <title>Harry Potter Info</title>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">Harry Potter</div>
+            <button class="menu-toggle" aria-label="Open Navigation">&#9776;</button>
+            <ul class="nav-links">
+                <li><a href="#characters">Characters</a></li>
+                <li><a href="#spells">Spells</a></li>
+                <li><a href="#books">Books</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section id="characters">
+            <h1>Harry Potter Characters</h1>
+            <div id="character-list" class="character-grid">
+                <!-- Dynamic character cards will be loaded here -->
+            </div>
+        </section>
+        <section id="spells" style="display: none;">
+            <h1>Harry Potter Spells</h1>
+            <ul id="spell-list" class="spell-grid">
+                <!-- Spell items will be loaded here -->
+            </ul>
+        </section>
+        <section id="books" style="display: none;">
+            <h1>Harry Potter Books</h1>
+            <ul id="book-list" class="book-grid">
+                <!-- Book items will be loaded here -->
+            </ul>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 Harry Potter API Web | Developed by Alejandro Pobes</p>
+    </footer>
+
+    <div id="character-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <img id="modal-image" src="" alt="">
+            <h3 id="modal-name" style="font-size: 1.8rem; margin: 1rem 0;"></h3>
+            <p id="modal-info" style="font-size: 1rem; line-height: 1.5;"></p>
+            
+            <ul id="modal-additional-info" style="list-style: none; padding: 0; font-size: 1rem;">
+                <!-- Additional info items -->
+            </ul>
+            <h4 style="margin-top: 1.5rem; font-size: 1.5rem;">Top Spells</h4>
+            <ul id="modal-top-spells" style="list-style: none; padding: 0; font-size: 1rem;">
+                <!-- Top spell info -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const dbURL = "db.json";
+
+        // Fetch and display data from db.json
+        async function loadData() {
+            try {
+                const response = await fetch(dbURL);
+                const data = await response.json();
+
+                const characters = data.characters;
+                const spells = data.spells;
+                const books = data.books;
+
+                const characterList = document.getElementById('character-list');
+                const spellList = document.getElementById('spell-list');
+                const bookList = document.getElementById('book-list');
+
+                characterList.innerHTML = ''; // Clear existing content
+                spellList.innerHTML = ''; // Clear spell list
+                bookList.innerHTML = ''; // Clear book list
+
+                // Display characters
+                characters.forEach(character => {
+                    const card = document.createElement('div');
+                    card.className = 'character-card';
+                    card.innerHTML = `
+                        <img src="${character.image || 'images/default.jpg'}" alt="${character.character}">
+                        <h3>${character.character}</h3>
+                        <p>House: ${character.hogwartsHouse || 'Unknown'}</p>
+                    `;
+                    card.addEventListener('click', () => openModal(character, spells));
+                    characterList.appendChild(card);
+                });
+
+                // Display spells
+                spells.forEach(spell => {
+                    const spellItem = document.createElement('li');
+                    spellItem.innerHTML = `<strong>${spell.spell}:</strong> ${spell.use}`;
+                    spellList.appendChild(spellItem);
+                });
+
+                // Display books
+                books.forEach(book => {
+                    const bookItem = document.createElement('li');
+                    bookItem.innerHTML = `<strong>${book.title}:</strong> ${book.description}`;
+                    bookList.appendChild(bookItem);
+                });
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        }
+
+        // Modal functionality
+        const modal = document.getElementById('character-modal');
+        const modalImage = document.getElementById('modal-image');
+        const modalName = document.getElementById('modal-name');
+        const modalInfo = document.getElementById('modal-info');
+        const modalAdditionalInfo = document.getElementById('modal-additional-info');
+        const modalTopSpells = document.getElementById('modal-top-spells');
+
+        function openModal(character, spells) {
+            modalImage.src = character.image || 'images/default.jpg';
+            modalName.textContent = character.character || 'Unknown';
+            modalInfo.innerHTML = `
+                <p><strong>House:</strong> ${character.hogwartsHouse || 'Unknown'}</p>
+                <p><strong>Interpreted by:</strong> ${character.interpretedBy || 'Unknown'}</p>
+                <p><strong>Nickname:</strong> ${character.nickname || 'Unknown'}</p>
+                <p><strong>Children:</strong> ${character.child && character.child.length > 0 ? character.child.join(', ') : 'None'}</p>
+            `;
+
+           
+
+            // Display top spells dynamically
+            modalTopSpells.innerHTML = '';
+            const characterSpells = spells.filter(spell => character.spellIds && character.spellIds.includes(spell.id));
+            const topSpells = characterSpells.length > 0 ? characterSpells.slice(0, 3) : spells.slice(0, 3);
+
+            topSpells.forEach(spell => {
+                const spellItem = document.createElement('li');
+                spellItem.innerHTML = `<strong>${spell.spell}:</strong> ${spell.use}`;
+                modalTopSpells.appendChild(spellItem);
+            });
+
+            modal.classList.add('active');
+        }
+
+        document.querySelector('.modal-close').addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+
+        // Close modal on background click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+            }
+        });
+
+        // Navigation functionality
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+
+                document.querySelectorAll('main section').forEach(section => {
+                    section.style.display = 'none';
+                });
+
+                document.getElementById(targetId).style.display = 'block';
+            });
+        });
+
+        // Menu toggle functionality for mobile
+        document.querySelector('.menu-toggle').addEventListener('click', () => {
+            document.querySelector('.nav-links').classList.toggle('active');
+        });
+
+        // Load data on page load
+        loadData();
+    </script>
+</body>
+</html>
