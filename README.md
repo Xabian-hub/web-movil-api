@@ -20,10 +20,10 @@ El menú no se desplegaba correctamente en dispositivos pequeños.
 Solución: Implementé un sistema de clases activas con JavaScript para que el menú funcione correctamente en todas las resoluciones.
 
 
-Nota del proyecto: 9/10 bajado a un 8/10 por tardar tanto
+Nota del proyecto: 8/10 bajado a un 7.5/10 por tardar tanto
 Razón de la nota:
 
-Me pondría un 9 porque el proyecto cumple con los requisitos propuestos:
+Me pondría un 7.5 porque el proyecto cumple con los requisitos propuestos:
 Es responsivo, adaptado para móviles.
 Muestra datos de manera clara y organizada, con navegación funcional entre páginas (personajes, hechizos, libros).
 Implementa un diseño visual agradable con un menú interactivo, tarjetas bien diseñadas y modales atractivos.
